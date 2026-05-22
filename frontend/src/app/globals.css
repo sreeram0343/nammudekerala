@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-kerala-green-50: #ecfdf5;
+  --color-kerala-green-100: #d1fae5;
+  --color-kerala-green-500: #10b981;
+  --color-kerala-green-600: #059669;
+  --color-kerala-green-700: #047857;
+  --color-kerala-green-900: #064e3b;
+  
+  --color-kerala-orange-500: #f97316;
+  --color-kerala-orange-600: #ea580c;
+  
+  --color-kerala-dark-bg: #0b0f19;
+  --color-kerala-dark-card: #111827;
+  --color-kerala-dark-border: #1f2937;
+  
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --kerala-green: #059669;
+  --kerala-orange: #f97316;
+}
+
+.dark {
+  --background: #0b0f19;
+  --foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --border: #1f2937;
+  --kerala-green: #10b981;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+/* Smooth glass effect helper */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Leaflet Map overrides for dark/light integration */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background-color: #0b0f19 !important;
+  font-family: inherit !important;
+}
+
+.leaflet-bar {
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.leaflet-bar a {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-bottom: 1px solid var(--border) !important;
+  transition: all 0.2s;
+}
+
+.leaflet-bar a:hover {
+  background-color: var(--kerala-green) !important;
+  color: white !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+  border: 1px solid var(--border) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--foreground) !important;
+  padding: 8px !important;
+}
+
+/* Custom Marker Styling */
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  border: 2px solid white;
+  transition: all 0.2s ease-in-out;
+}
+.custom-marker:hover {
+  transform: scale(1.15);
+}

@@ -1,0 +1,25 @@
+# SQLite Database
+kerala_civic.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# Next.js & Frontend dependencies
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Local uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# System files
+.DS_Store
+Thumbs.db
