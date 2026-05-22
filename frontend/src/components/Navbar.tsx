@@ -26,31 +26,16 @@ export const Navbar: React.FC = () => {
       
     // Sync dark mode state from document class and localStorage
     if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      
-      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add("dark");
-        setIsDarkMode(true);
-      } else {
-        document.documentElement.classList.remove("dark");
-        setIsDarkMode(false);
-      }
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
     }
   }, []);
 
   const toggleDarkMode = () => {
     if (typeof window !== "undefined") {
       const root = document.documentElement;
-      if (root.classList.contains("dark")) {
-        root.classList.remove("dark");
-        localStorage.setItem("theme", "light");
-        setIsDarkMode(false);
-      } else {
-        root.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-        setIsDarkMode(true);
-      }
+      const isDark = root.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      setIsDarkMode(isDark);
     }
   };
 

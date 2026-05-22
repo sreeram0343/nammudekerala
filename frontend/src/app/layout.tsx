@@ -29,6 +29,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        {/* Blocking script to apply dark mode before hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark')
+                } else {
+                  document.documentElement.classList.remove('dark')
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
         {/* Leaflet CSS for interactive mapping support */}
         <link 
           rel="stylesheet" 
@@ -37,7 +51,7 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className="antialiased h-full dark:bg-kerala-dark-bg text-foreground">
+      <body className="antialiased h-full text-foreground">
         <AuthProvider>
           {children}
         </AuthProvider>
