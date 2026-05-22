@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Shield, Mail, Lock, User as UserIcon, CheckCircle2, ChevronRight, MapPin, Award } from "lucide-react";
+import { assemblyService } from "@/services/assemblyService";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,9 +29,8 @@ export default function LoginPage() {
       router.push("/");
     }
     
-    // Fetch assemblies for signup constituency selection
-    fetch("http://localhost:8000/api/assemblies")
-      .then((res) => res.json())
+    // Fetch assemblies for signup constituency selection using assemblyService
+    assemblyService.getAssemblies()
       .then((data) => {
         setAssemblies(data);
         if (data.length > 0) setConstituencyId(data[0].id);

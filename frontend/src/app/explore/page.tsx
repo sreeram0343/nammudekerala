@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import AssemblySidebar from "@/components/AssemblySidebar";
 import { Compass, Info, Map, Layers, HelpCircle } from "lucide-react";
+import { postService } from "@/services/postService";
 
 // Import MapHotspots dynamically with SSR disabled to prevent Leaflet window reference errors
 const MapHotspots = dynamic(() => import("@/components/MapHotspots").then((mod) => mod.MapHotspots), {
@@ -46,16 +47,8 @@ export default function ExplorePage() {
     const fetchAllPosts = async () => {
       setLoading(true);
       try {
-        let url = "http://localhost:8000/api/posts?sort=new";
-        if (selectedCategory) {
-          url += `&category=${selectedCategory}`;
-        }
-        
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          setPosts(data);
-        }
+        const data = await postService.getPosts(undefined, selectedCategory || undefined, "new");
+        setPosts(data as any);
       } catch (err) {
         console.error("Error loading map posts:", err);
       } finally {

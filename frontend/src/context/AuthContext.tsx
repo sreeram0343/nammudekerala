@@ -1,14 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "@/services/authService";
 
 export interface User {
   id: number;
   username: string;
   email: string;
   role: string; // citizen, representative, admin
-  profile_image?: string;
-  constituency_id?: number;
+  profile_image: string | null;
+  constituency_id: number | null;
 }
 
 interface AuthContextType {
@@ -38,28 +39,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (storedToken && storedUser) {
         try {
-          // Verify token against backend
-          const res = await fetch("http://localhost:8000/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
-          
-          if (res.ok) {
-            const userData = await res.json();
-            setUser(userData);
-            setToken(storedToken);
-            localStorage.setItem("nk_user", JSON.stringify(userData));
-          } else {
-            // Token expired or invalid
-            localStorage.removeItem("nk_token");
-            localStorage.removeItem("nk_user");
-          }
+          // Verify token against backend using authService
+          const userData = await authService.getMe();
+          setUser(userData);
+          setToken(storedToken);
+          localStorage.setItem("nk_user", JSON.stringify(userData));
         } catch (err) {
           console.error("Session restore failed, falling back to cached local storage:", err);
           // Network error: use cached offline fallback for smooth local testing
-          setUser(JSON.parse(storedUser));
-          setToken(storedToken);
+          if (err instanceof Error && err.message.toLowerCase().includes("network")) {
+            setUser(JSON.parse(storedUser));
+            setToken(storedToken);
+          } else {
+            localStorage.removeItem("nk_token");
+            localStorage.removeItem("nk_user");
+          }
         }
       }
       setLoading(false);
@@ -70,17 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      
-      if (!res.ok) return false;
-      
-      const data = await res.json();
+      const data = await authService.login({ username, password });
       setToken(data.access_token);
       setUser(data.user);
       
@@ -102,21 +86,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     constituencyId?: number
   ): Promise<boolean> => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          role,
-          constituency_id: constituencyId || null
-        }),
+      await authService.signup({
+        username,
+        email,
+        password,
+        role,
+        constituency_id: constituencyId || null
       });
-      
-      return res.ok;
+      return true;
     } catch (err) {
       console.error("Signup error:", err);
       return false;

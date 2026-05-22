@@ -4,9 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Sun, Moon, Search, MapPin, LogOut, User as UserIcon, ShieldAlert } from "lucide-react";
+import { assemblyService } from "@/services/assemblyService";
 
 export const Navbar: React.FC = () => {
   const { user, logout, selectedAssembly, setSelectedAssembly } = useAuth();
+  const [allAssemblies, setAllAssemblies] = useState<{ id: number; assembly_name: string; district: string; slug: string }[]>([]);
+  // Use local state alias to retain filtered list logic below
   const [assemblies, setAssemblies] = useState<{ id: number; assembly_name: string; district: string; slug: string }[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,10 +17,12 @@ export const Navbar: React.FC = () => {
 
   // Load assemblies for search dropdown
   useEffect(() => {
-    fetch("http://localhost:8000/api/assemblies")
-      .then((res) => res.json())
-      .then((data) => setAssemblies(data))
-      .catch((err) => console.error("Error loading assemblies:", err));
+    assemblyService.getAssemblies()
+      .then((data) => {
+        setAllAssemblies(data);
+        setAssemblies(data);
+      })
+      .catch((err) => console.error("Error loading assemblies in navbar:", err));
       
     // Sync dark mode state from document class
     if (typeof window !== "undefined") {

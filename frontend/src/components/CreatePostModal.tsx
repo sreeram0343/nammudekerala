@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { X, Upload, Shield, Image as ImageIcon, MapPin } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { assemblyService } from "@/services/assemblyService";
+import { postService } from "@/services/postService";
+import { uploadMedia } from "@/services/api";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -32,8 +35,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
 
   useEffect(() => {
     if (isOpen) {
-      fetch("http://localhost:8000/api/assemblies")
-        .then((res) => res.json())
+      assemblyService.getAssemblies()
         .then((data) => {
           setAssemblies(data);
           // Set default assembly to user's constituency if available
@@ -44,7 +46,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
             setAssemblyTag(data[0]?.assembly_name || "");
           }
         })
-        .catch((err) => console.error("Error loading assemblies:", err));
+        .catch((err) => console.error("Error loading assemblies in modal:", err));
     }
   }, [isOpen, user]);
 
@@ -53,19 +55,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("http://localhost:8000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setMediaUrl(data.url);
-      }
+      const data = await uploadMedia(file);
+      setMediaUrl(data.url);
     } catch (err) {
       console.error("File upload failed:", err);
     } finally {
@@ -78,35 +70,24 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     if (!token) return;
 
     try {
-      const res = await fetch("http://localhost:8000/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          content,
-          category,
-          assembly_tag: assemblyTag,
-          is_anonymous: isAnonymous,
-          media_url: mediaUrl || null,
-        }),
+      await postService.createPost({
+        title,
+        content,
+        category,
+        assembly_tag: assemblyTag,
+        is_anonymous: isAnonymous,
+        media_url: mediaUrl || null,
       });
 
-      if (res.ok) {
-        onPostCreated();
-        setTitle("");
-        setContent("");
-        setMediaUrl("");
-        setIsAnonymous(false);
-        onClose();
-      } else {
-        const errData = await res.json();
-        alert(errData.detail || "Failed to create post. Please try again.");
-      }
+      onPostCreated();
+      setTitle("");
+      setContent("");
+      setMediaUrl("");
+      setIsAnonymous(false);
+      onClose();
     } catch (err) {
       console.error("Post creation error:", err);
+      alert(err instanceof Error ? err.message : "Failed to create post. Please try again.");
     }
   };
 

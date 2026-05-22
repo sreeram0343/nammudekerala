@@ -4,36 +4,10 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowBigUp, ArrowBigDown, MessageSquare, Share2, Award, Calendar, CheckCircle2, User as UserIcon, Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { postService } from "@/services/postService";
 
-export interface PostResponse {
-  id: number;
-  title: string;
-  content: string;
-  media_url?: string;
-  assembly_id: number;
-  assembly_name: string;
-  assembly_slug: string;
-  category: string;
-  upvotes_count: number;
-  downvotes_count: number;
-  is_anonymous: boolean;
-  status: string; // reported, acknowledged, resolved
-  created_at: string;
-  comments_count: number;
-  user_id?: number;
-  username: string;
-  user_image?: string;
-  user_role: string;
-  user_vote?: string | null;
-  replies: {
-    id: number;
-    post_id: number;
-    content: string;
-    progress_proof_url?: string;
-    created_at: string;
-    representative_name: string;
-  }[];
-}
+import { PostResponse } from "@/services/postService";
+export type { PostResponse };
 
 interface PostCardProps {
   post: PostResponse;
@@ -70,32 +44,18 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdate }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/vote", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          post_id: post.id,
-          vote_type: nextVote,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setLocalVote(nextVote === "none" ? null : nextVote);
-        setUpvotes(data.upvotes);
-        setDownvotes(data.downvotes);
-        
-        if (onPostUpdate) {
-          onPostUpdate({
-            ...post,
-            upvotes_count: data.upvotes,
-            downvotes_count: data.downvotes,
-            user_vote: nextVote === "none" ? null : nextVote,
-          });
-        }
+      const data = await postService.submitVote(post.id, nextVote);
+      setLocalVote(nextVote === "none" ? null : nextVote);
+      setUpvotes(data.upvotes);
+      setDownvotes(data.downvotes);
+      
+      if (onPostUpdate) {
+        onPostUpdate({
+          ...post,
+          upvotes_count: data.upvotes,
+          downvotes_count: data.downvotes,
+          user_vote: nextVote === "none" ? null : nextVote,
+        });
       }
     } catch (err) {
       console.error("Voting failed:", err);

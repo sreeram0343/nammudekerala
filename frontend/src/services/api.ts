@@ -15,7 +15,7 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
   // Retrieve cached token from localStorage
   const headers = new Headers(options.headers || {});
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('nk_token');
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -51,7 +51,7 @@ export async function uploadMedia(file: File): Promise<{ url: string }> {
 
   const headers = new Headers();
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('nk_token');
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }

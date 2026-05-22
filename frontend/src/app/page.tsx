@@ -8,6 +8,9 @@ import CreatePostModal from "@/components/CreatePostModal";
 import { useAuth } from "@/context/AuthContext";
 import { PlusCircle, Flame, AlertCircle, RefreshCw, BarChart2, Radio, CheckCircle, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { postService } from "@/services/postService";
+import { assemblyService } from "@/services/assemblyService";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 export default function Home() {
   const { token, user } = useAuth();
@@ -42,11 +45,8 @@ export default function Home() {
 
   const fetchGlobalStats = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/stats");
-      if (res.ok) {
-        const data = await res.json();
-        setGlobalStats(data);
-      }
+      const data = await assemblyService.getGlobalStats();
+      setGlobalStats(data);
     } catch (err) {
       console.error("Error loading global stats:", err);
     }
@@ -54,11 +54,8 @@ export default function Home() {
 
   const fetchIgnoredPosts = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/posts?sort=ignored");
-      if (res.ok) {
-        const data = await res.json();
-        setIgnoredPosts(data.slice(0, 3));
-      }
+      const data = await postService.getPosts(undefined, undefined, "ignored");
+      setIgnoredPosts(data.slice(0, 3));
     } catch (err) {
       console.error("Error loading ignored posts:", err);
     }
@@ -67,22 +64,8 @@ export default function Home() {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:8000/api/posts?sort=${sort}`;
-      if (selectedCategory) {
-        url += `&category=${selectedCategory}`;
-      }
-      
-      // Inject token if authenticated to resolve individual upvote states
-      const headers: HeadersInit = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      const res = await fetch(url, { headers });
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data);
-      }
+      const data = await postService.getPosts(undefined, selectedCategory || undefined, sort);
+      setPosts(data);
     } catch (err) {
       console.error("Error loading posts:", err);
     } finally {
@@ -96,29 +79,20 @@ export default function Home() {
     fetchIgnoredPosts();
   }, [sort, selectedCategory, token]);
 
-  // WebSocket Live Notification Setup
-  useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws");
+  // WebSocket Live Notification Setup using custom hook
+  useWebSocket((data) => {
+    setWsMessage(data as any);
     
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setWsMessage(data);
-      
-      // Auto-hide alert after 5 seconds
-      setTimeout(() => {
-        setWsMessage(null);
-      }, 5000);
-      
-      // Proactively refresh posts in background
-      fetchPosts();
-      fetchGlobalStats();
-      fetchIgnoredPosts();
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [sort, selectedCategory]);
+    // Auto-hide alert after 5 seconds
+    setTimeout(() => {
+      setWsMessage(null);
+    }, 5000);
+    
+    // Proactively refresh posts in background
+    fetchPosts();
+    fetchGlobalStats();
+    fetchIgnoredPosts();
+  });
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-kerala-dark-bg transition-colors duration-300">

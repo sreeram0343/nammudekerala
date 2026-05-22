@@ -7,6 +7,7 @@ import AssemblySidebar from "@/components/AssemblySidebar";
 import PostCard, { PostResponse } from "@/components/PostCard";
 import { useAuth } from "@/context/AuthContext";
 import { Award, MessageSquare, Send, Reply, Calendar, CheckCircle2, ShieldAlert, Image as ImageIcon, MapPin } from "lucide-react";
+import { postService } from "@/services/postService";
 
 interface CommentType {
   id: number;
@@ -42,24 +43,13 @@ export default function PostDetailPage() {
   const fetchPostDetails = async () => {
     setLoading(true);
     try {
-      const headers: HeadersInit = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      // 1. Fetch Post Details
-      const postRes = await fetch(`http://localhost:8000/api/posts/${postId}`, { headers });
-      if (postRes.ok) {
-        const postData = await postRes.json();
-        setPost(postData);
-      }
+      // 1. Fetch Post Details using postService
+      const postData = await postService.getPostById(postId);
+      setPost(postData);
 
-      // 2. Fetch Comments Tree
-      const commentsRes = await fetch(`http://localhost:8000/api/comments/${postId}`);
-      if (commentsRes.ok) {
-        const commentsData = await commentsRes.json();
-        setComments(commentsData);
-      }
+      // 2. Fetch Comments Tree using postService
+      const commentsData = await postService.getComments(postId);
+      setComments(commentsData as any);
     } catch (err) {
       console.error("Error loading post details:", err);
     } finally {
@@ -82,30 +72,21 @@ export default function PostDetailPage() {
     if (!content.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:8000/api/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          post_id: postId,
-          content,
-          parent_id: parentId,
-        }),
+      await postService.createComment({
+        post_id: postId,
+        content,
+        parent_id: parentId,
       });
 
-      if (res.ok) {
-        if (parentId) {
-          setReplyContent("");
-          setReplyTargetId(null);
-        } else {
-          setNewComment("");
-        }
-        
-        // Refresh details & comment tree
-        fetchPostDetails();
+      if (parentId) {
+        setReplyContent("");
+        setReplyTargetId(null);
+      } else {
+        setNewComment("");
       }
+      
+      // Refresh details & comment tree
+      fetchPostDetails();
     } catch (err) {
       console.error("Comment submission failed:", err);
     }
@@ -118,28 +99,21 @@ export default function PostDetailPage() {
 
     setSubmittingMla(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/posts/${post.id}/reply?status_update=${mlaStatusUpdate}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      await postService.submitRepresentativeReply(
+        post.id,
+        {
           content: mlaReplyText,
           progress_proof_url: mlaProofUrl || null,
-        }),
-      });
+        },
+        mlaStatusUpdate as 'acknowledged' | 'resolved'
+      );
 
-      if (res.ok) {
-        setMlaReplyText("");
-        setMlaProofUrl("");
-        fetchPostDetails();
-      } else {
-        const err = await res.json();
-        alert(err.detail || "Failed to submit official response.");
-      }
+      setMlaReplyText("");
+      setMlaProofUrl("");
+      fetchPostDetails();
     } catch (err) {
       console.error("MLA reply failed:", err);
+      alert(err instanceof Error ? err.message : "Failed to submit official response.");
     } finally {
       setSubmittingMla(false);
     }

@@ -8,6 +8,8 @@ import PostCard, { PostResponse } from "@/components/PostCard";
 import CreatePostModal from "@/components/CreatePostModal";
 import { MapPin, User as UserIcon, CheckCircle, BarChart2, Heart, Award, ShieldAlert, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { assemblyService } from "@/services/assemblyService";
+import { postService } from "@/services/postService";
 
 interface AssemblyStats {
   id: number;
@@ -39,24 +41,13 @@ export default function AssemblyPage() {
   const fetchAssemblyData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch assembly stats
-      const statsRes = await fetch(`http://localhost:8000/api/assembly/${decodedName}`);
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats(statsData);
-      }
+      // 1. Fetch assembly stats using assemblyService
+      const statsData = await assemblyService.getAssemblyStats(decodedName);
+      setStats(statsData as any);
 
-      // 2. Fetch assembly posts
-      const headers: HeadersInit = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      const postsRes = await fetch(`http://localhost:8000/api/posts?assembly_name=${decodedName}&sort=trending`, { headers });
-      if (postsRes.ok) {
-        const postsData = await postsRes.json();
-        setPosts(postsData);
-      }
+      // 2. Fetch assembly posts using postService
+      const postsData = await postService.getPosts(decodedName, undefined, "trending");
+      setPosts(postsData);
     } catch (err) {
       console.error("Error loading assembly page data:", err);
     } finally {

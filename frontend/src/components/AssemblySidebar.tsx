@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Compass, AlertOctagon, CheckSquare, Sparkles, MapPin, Plus, Heart } from "lucide-react";
+import { assemblyService } from "@/services/assemblyService";
 
 interface SidebarProps {
   currentSort?: string;
@@ -17,9 +18,8 @@ export const AssemblySidebar: React.FC<SidebarProps> = ({ currentSort, onSortCha
   const [followedAssemblies, setFollowedAssemblies] = useState<string[]>([]);
 
   useEffect(() => {
-    // Fetch all 140 constituencies
-    fetch("http://localhost:8000/api/assemblies")
-      .then((res) => res.json())
+    // Fetch all 140 constituencies using assemblyService
+    assemblyService.getAssemblies()
       .then((data) => {
         setAllAssemblies(data);
       })
