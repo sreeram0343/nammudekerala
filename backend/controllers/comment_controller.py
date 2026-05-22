@@ -5,7 +5,7 @@ from backend.models import Comment, Post, Notification
 from backend.schemas import CommentCreate
 from backend.services.websocket_service import manager
 
-def create_new_comment(db: Session, comment_in: CommentCreate, current_user) -> dict:
+async def create_new_comment(db: Session, comment_in: CommentCreate, current_user) -> dict:
     post = db.query(Post).filter(Post.id == comment_in.post_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
