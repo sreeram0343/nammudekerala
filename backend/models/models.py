@@ -20,6 +20,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     votes = relationship("Vote", back_populates="user")
     official_replies = relationship("RepresentativeReply", back_populates="representative")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    follows = relationship("Follow", back_populates="user", cascade="all, delete-orphan")
+    reports_filed = relationship("Report", back_populates="user", cascade="all, delete-orphan")
 
 
 class Assembly(Base):
@@ -41,6 +44,7 @@ class Assembly(Base):
     # Relationships
     users = relationship("User", back_populates="constituency")
     posts = relationship("Post", back_populates="assembly")
+    follows = relationship("Follow", back_populates="assembly", cascade="all, delete-orphan")
 
 
 class Post(Base):
@@ -67,6 +71,8 @@ class Post(Base):
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     votes = relationship("Vote", back_populates="post", cascade="all, delete-orphan")
     replies = relationship("RepresentativeReply", back_populates="post", cascade="all, delete-orphan")
+    reports = relationship("Report", back_populates="post", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="post", cascade="all, delete-orphan")
 
 
 class Comment(Base):
@@ -112,3 +118,47 @@ class RepresentativeReply(Base):
     # Relationships
     post = relationship("Post", back_populates="replies")
     representative = relationship("User", back_populates="official_replies")
+
+
+class Follow(Base):
+    __tablename__ = "follows"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    assembly_id = Column(Integer, ForeignKey("assemblies.id"), nullable=False)
+
+    # Relationships
+    user = relationship("User", back_populates="follows")
+    assembly = relationship("Assembly", back_populates="follows")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    type = Column(String, nullable=False)  # new_post, mla_reply, milestone, etc.
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    is_read = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+    post = relationship("Post", back_populates="notifications")
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    reason = Column(String, nullable=False)
+    details = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="reports_filed")
+    post = relationship("Post", back_populates="reports")

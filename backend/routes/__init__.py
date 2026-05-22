@@ -1,0 +1,9 @@
+from backend.routes.auth_routes import router as auth_router
+from backend.routes.assembly_routes import router as assembly_router
+from backend.routes.post_routes import router as post_router
+from backend.routes.comment_routes import router as comment_router
+from backend.routes.representative_routes import router as representative_router
+from backend.routes.notification_routes import router as notification_router
+from backend.routes.follow_routes import router as follow_router
+from backend.routes.report_routes import router as report_router
+from backend.routes.upload_routes import router as upload_router

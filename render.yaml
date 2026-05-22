@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: nammude-kerala-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: "" # Ex: postgresql://username:password@neon-db-host/dbname
+      - key: JWT_SECRET
+        generateValue: true # Generates a random secure secret automatically
+      - key: CLOUDINARY_CLOUD_NAME
+        value: "" # Optional: Cloudinary Cloud Name
+      - key: CLOUDINARY_API_KEY
+        value: "" # Optional: Cloudinary API Key
+      - key: CLOUDINARY_API_SECRET
+        value: "" # Optional: Cloudinary API Secret
+      - key: CLIENT_URL
+        value: "" # Ex: https://nammude-kerala.vercel.app

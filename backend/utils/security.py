@@ -10,9 +10,9 @@ from backend.database import get_db
 from backend.models import User
 
 # Settings
-SECRET_KEY = os.getenv("SECRET_KEY", "nammude-kerala-secret-key-wow-very-secure-2026")
+SECRET_KEY = os.getenv("JWT_SECRET", os.getenv("SECRET_KEY", "nammude-kerala-secret-key-wow-very-secure-2026"))
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days for convenient local testing
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 

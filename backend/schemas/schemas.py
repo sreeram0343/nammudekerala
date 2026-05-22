@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
 
@@ -9,7 +9,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    role: str = "citizen"  # citizen, representative
+    role: str = "citizen"  # citizen, representative, admin
     constituency_id: Optional[int] = None
 
 class UserLogin(BaseModel):
@@ -151,3 +151,46 @@ CommentResponse.model_rebuild()
 class VoteSubmit(BaseModel):
     post_id: int
     vote_type: str  # "up", "down", or "none" (to retract)
+
+# ----------------- Follow Schemas -----------------
+class FollowToggle(BaseModel):
+    assembly_id: int
+
+class FollowResponse(BaseModel):
+    id: int
+    user_id: int
+    assembly_id: int
+
+    class Config:
+        from_attributes = True
+
+# ----------------- Notification Schemas -----------------
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: int
+    post_id: Optional[int] = None
+    type: str
+    title: str
+    content: str
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# ----------------- Report Schemas -----------------
+class ReportCreate(BaseModel):
+    post_id: int
+    reason: str
+    details: Optional[str] = None
+
+class ReportResponse(BaseModel):
+    id: int
+    user_id: int
+    post_id: int
+    reason: str
+    details: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
