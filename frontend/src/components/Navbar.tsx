@@ -56,9 +56,11 @@ export const Navbar: React.FC = () => {
         {/* Brand Logo */}
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white shadow-lg shadow-emerald-600/20">
-              ന
-            </span>
+            <img 
+              src="/logo.png" 
+              alt="ന" 
+              className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-emerald-600/20" 
+            />
             <div>
               <h1 className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-500">
                 Nammude Kerala
