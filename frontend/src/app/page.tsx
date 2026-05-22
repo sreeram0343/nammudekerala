@@ -99,13 +99,15 @@ export default function Home() {
       <Navbar />
 
       {/* Main Grid Wrapper */}
-      <main className="mx-auto flex w-full max-w-7xl flex-1 gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
         
-        {/* Left Sidebar */}
-        <AssemblySidebar currentSort={sort} onSortChange={(s) => setSort(s)} />
+        {/* Left Sidebar - Hidden on mobile, shown as top section or toggleable later */}
+        <div className="hidden lg:block">
+          <AssemblySidebar currentSort={sort} onSortChange={(s) => setSort(s)} />
+        </div>
 
         {/* Center Posts Feed */}
-        <section className="flex-1 max-w-2xl space-y-6">
+        <section className="w-full flex-1 lg:max-w-2xl space-y-6">
           
           {/* WebSocket Broadcast Banner */}
           {wsMessage && (

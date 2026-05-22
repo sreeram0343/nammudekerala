@@ -39,20 +39,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (storedToken && storedUser) {
         try {
+          // Attempt to parse stored user data safely
+          const parsedUser = JSON.parse(storedUser);
+          
           // Verify token against backend using authService
           const userData = await authService.getMe();
           setUser(userData);
           setToken(storedToken);
           localStorage.setItem("nk_user", JSON.stringify(userData));
         } catch (err) {
-          console.error("Session restore failed, falling back to cached local storage:", err);
-          // Network error: use cached offline fallback for smooth local testing
-          if (err instanceof Error && err.message.toLowerCase().includes("network")) {
-            setUser(JSON.parse(storedUser));
-            setToken(storedToken);
-          } else {
+          console.error("Session restore failed:", err);
+          // If it's a 401 Unauthorized or 403, clear local storage
+          if (err instanceof Error && (err.message.includes("401") || err.message.includes("403") || err.message.toLowerCase().includes("unauthorized"))) {
             localStorage.removeItem("nk_token");
             localStorage.removeItem("nk_user");
+            setToken(null);
+            setUser(null);
+          } else if (storedUser) {
+            // Network error fallback to cached user
+            try {
+              setUser(JSON.parse(storedUser));
+              setToken(storedToken);
+            } catch {
+              localStorage.removeItem("nk_token");
+              localStorage.removeItem("nk_user");
+            }
           }
         }
       }

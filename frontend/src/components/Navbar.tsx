@@ -24,9 +24,18 @@ export const Navbar: React.FC = () => {
       })
       .catch((err) => console.error("Error loading assemblies in navbar:", err));
       
-    // Sync dark mode state from document class
+    // Sync dark mode state from document class and localStorage
     if (typeof window !== "undefined") {
-      setIsDarkMode(document.documentElement.classList.contains("dark"));
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add("dark");
+        setIsDarkMode(true);
+      } else {
+        document.documentElement.classList.remove("dark");
+        setIsDarkMode(false);
+      }
     }
   }, []);
 
@@ -72,15 +81,15 @@ export const Navbar: React.FC = () => {
           </Link>
         </div>
 
-        {/* Search / Constituency Selector Dropdown */}
-        <div className="relative hidden max-w-md flex-1 px-12 md:block">
+        {/* Search / Constituency Selector Dropdown - Hidden on small mobile, compact on tablet */}
+        <div className="relative hidden max-w-md flex-1 px-4 md:block lg:px-12">
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
               <Search className="h-4 w-4" />
             </div>
             <input
               type="text"
-              placeholder="Search assemblies (e.g. Kazhakuttom)..."
+              placeholder="Search assemblies..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
