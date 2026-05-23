@@ -18,6 +18,12 @@
   --color-kerala-dark-card: #111827;
   --color-kerala-dark-border: #1f2937;
   
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  
   --animate-float: float 3s ease-in-out infinite;
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
