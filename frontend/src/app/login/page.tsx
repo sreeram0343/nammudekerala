@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Shield, Mail, Lock, User as UserIcon, CheckCircle2, ChevronRight, MapPin, Award } from "lucide-react";
 import { assemblyService } from "@/services/assemblyService";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, signup, user } = useAuth();
+  const { login, signup, googleLogin, user } = useAuth();
 
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [username, setUsername] = useState("");
@@ -46,26 +47,43 @@ export default function LoginPage() {
 
     try {
       if (isLoginTab) {
-        const success = await login(username, password);
-        if (success) {
+        const result = await login(username, password);
+        if (result.success) {
           router.push("/");
         } else {
-          setErrorMsg("Invalid username or password. Please try again.");
+          setErrorMsg(result.message || "Invalid username or password. Please try again.");
         }
       } else {
-        const success = await signup(username, email, password, role, constituencyId);
-        if (success) {
+        const result = await signup(username, email, password, role, constituencyId);
+        if (result.success) {
           setSuccessMsg("Registration successful! Please sign in using your credentials.");
           setIsLoginTab(true);
           setEmail("");
           setPassword("");
         } else {
-          setErrorMsg("Registration failed. Username or email might already be registered.");
+          setErrorMsg(result.message || "Registration failed. Username or email might already be registered.");
         }
       }
     } catch (err) {
       console.error("Auth action failed:", err);
       setErrorMsg("An unexpected connection error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        router.push("/");
+      } else {
+        setErrorMsg(result.message || "Google login failed.");
+      }
+    } catch (err) {
+      setErrorMsg("Google authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -130,6 +148,25 @@ export default function LoginPage() {
             >
               Register
             </button>
+          </div>
+
+          {/* Google Login Section */}
+          <div className="flex flex-col items-center justify-center space-y-3 pb-2">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setErrorMsg("Google Login failed")}
+              useOneTap
+              theme="outline"
+              shape="pill"
+              size="large"
+              text={isLoginTab ? "signin_with" : "signup_with"}
+              width="100%"
+            />
+            <div className="relative w-full flex items-center gap-2 py-2">
+              <div className="h-[1px] w-full bg-border" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">Or use email</span>
+              <div className="h-[1px] w-full bg-border" />
+            </div>
           </div>
 
           {/* Feedback messages */}

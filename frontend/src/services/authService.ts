@@ -30,6 +30,13 @@ export const authService = {
     });
   },
 
+  googleLogin: async (token: string): Promise<TokenResponse> => {
+    return apiFetch<TokenResponse>('/api/auth/google-login', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
   getMe: async (): Promise<UserResponse> => {
     return apiFetch<UserResponse>('/api/auth/me', {
       method: 'GET',

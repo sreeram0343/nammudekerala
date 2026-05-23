@@ -26,23 +26,33 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    let errorDetail = 'Network request failed';
-    try {
-      const errorData = await response.json();
-      errorDetail = errorData.detail || errorDetail;
-    } catch {
-      // JSON parsing failed
+    if (!response.ok) {
+      let errorDetail = `Request failed with status ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorDetail = errorData.detail || errorDetail;
+      } catch {
+        // JSON parsing failed
+      }
+      
+      console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, errorDetail);
+      throw new Error(errorDetail);
     }
-    throw new Error(errorDetail);
-  }
 
-  return response.json() as Promise<T>;
+    return response.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error(`[API Connection Error] Failed to connect to ${API_BASE}. Ensure the backend is running and NEXT_PUBLIC_API_URL is set correctly.`);
+      throw new Error('Could not connect to the server. Please check your internet or try again later.');
+    }
+    throw error;
+  }
 }
 
 export async function uploadMedia(file: File): Promise<{ url: string }> {
@@ -57,22 +67,27 @@ export async function uploadMedia(file: File): Promise<{ url: string }> {
     }
   }
 
-  const response = await fetch(`${API_BASE}/api/upload`, {
-    method: 'POST',
-    headers,
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_BASE}/api/upload`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
 
-  if (!response.ok) {
-    let errorDetail = 'File upload failed';
-    try {
-      const errorData = await response.json();
-      errorDetail = errorData.detail || errorDetail;
-    } catch {
-      // JSON parsing failed
+    if (!response.ok) {
+      let errorDetail = 'File upload failed';
+      try {
+        const errorData = await response.json();
+        errorDetail = errorData.detail || errorDetail;
+      } catch {
+        // JSON parsing failed
+      }
+      throw new Error(errorDetail);
     }
-    throw new Error(errorDetail);
-  }
 
-  return response.json();
+    return response.json();
+  } catch (error) {
+    console.error('[Upload Error]:', error);
+    throw error;
+  }
 }

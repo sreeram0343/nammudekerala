@@ -8,3 +8,4 @@ websockets
 psycopg2-binary
 cloudinary
 email-validator
+google-auth

@@ -16,6 +16,9 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserGoogleLogin(BaseModel):
+    token: str  # The ID token from Google
+
 class UserResponse(BaseModel):
     id: int
     username: str
