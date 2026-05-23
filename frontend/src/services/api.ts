@@ -41,6 +41,11 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
         // JSON parsing failed
       }
       
+      if (response.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('nk_token');
+        localStorage.removeItem('nk_user');
+      }
+      
       console.error(`[API Error] ${options.method || 'GET'} ${url}:`, errorDetail);
       throw new Error(errorDetail);
     }
@@ -81,6 +86,10 @@ export async function uploadMedia(file: File): Promise<{ url: string }> {
         errorDetail = errorData.detail || errorDetail;
       } catch {
         // JSON parsing failed
+      }
+      if (response.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('nk_token');
+        localStorage.removeItem('nk_user');
       }
       throw new Error(errorDetail);
     }
