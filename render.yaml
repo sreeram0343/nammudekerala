@@ -17,3 +17,5 @@ services:
         value: "" # Optional: Cloudinary API Secret
       - key: CLIENT_URL
         value: "" # Ex: https://nammude-kerala.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        value: "" # Required: Google OAuth Client ID for verification
