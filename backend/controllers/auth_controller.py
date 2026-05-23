@@ -10,7 +10,6 @@ import os
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 def register_user(db: Session, user_in: UserCreate) -> User:
-# ... (existing register_user code)
     db_user_username = db.query(User).filter(User.username == user_in.username).first()
     if db_user_username:
         raise HTTPException(status_code=400, detail="Username already registered")

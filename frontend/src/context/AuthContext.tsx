@@ -5,7 +5,6 @@ import { authService } from "@/services/authService";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export interface User {
-# ...
   id: number;
   username: string;
   email: string;
@@ -31,7 +30,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-# ...
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -112,7 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (
-# ...
     username: string, 
     email: string, 
     password: string, 
@@ -135,7 +132,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-# ...
     setUser(null);
     setToken(null);
     localStorage.removeItem("nk_token");
