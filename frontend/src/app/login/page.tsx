@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
 
   // Redirect to home if already logged in
   useEffect(() => {
@@ -30,6 +31,11 @@ export default function LoginPage() {
       router.push("/");
     }
     
+    // Check backend health
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health`)
+      .then(res => res.ok ? setServerStatus("online") : setServerStatus("offline"))
+      .catch(() => setServerStatus("offline"));
+
     // Fetch assemblies for signup constituency selection using assemblyService
     assemblyService.getAssemblies()
       .then((data) => {
@@ -107,6 +113,21 @@ export default function LoginPage() {
           <h2 className="text-2xl font-black tracking-tight text-foreground">
             {isLoginTab ? "Welcome to Nammude Kerala" : "Join the Civic Square"}
           </h2>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            {serverStatus === "online" ? (
+              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                ● Server Online
+              </span>
+            ) : serverStatus === "offline" ? (
+              <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                ● Server Offline (Check Config)
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-400 animate-pulse">
+                ● Connecting to server...
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-1.5 dark:text-slate-400">
             {isLoginTab 
               ? "Sign in to report local issues, vote, and track MLA responses." 

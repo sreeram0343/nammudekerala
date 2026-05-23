@@ -39,14 +39,24 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:3001",
 ]
 client_url = os.getenv("CLIENT_URL")
 if client_url:
     allowed_origins.append(client_url.rstrip("/"))
+    # Also allow the www version if applicable
+    if "vercel.app" in client_url and "www." not in client_url:
+        parts = client_url.split("://")
+        if len(parts) == 2:
+            allowed_origins.append(f"{parts[0]}://www.{parts[1]}".rstrip("/"))
+
+# If no CLIENT_URL is set in production, this might be the cause of CORS errors
+if not client_url:
+    print("WARNING: CLIENT_URL environment variable is not set. CORS may block production frontend.")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins if client_url or os.getenv("VERCEL_URL") else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,6 +85,21 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "version": "1.1.0"}
+
+@app.get("/api/config-check")
+def config_check():
+    """
+    Safely check if critical environment variables are set.
+    DO NOT return the actual values (secrets).
+    """
+    return {
+        "DATABASE_URL_SET": bool(os.getenv("DATABASE_URL")),
+        "GOOGLE_CLIENT_ID_SET": bool(os.getenv("GOOGLE_CLIENT_ID")),
+        "JWT_SECRET_SET": bool(os.getenv("JWT_SECRET")),
+        "CLIENT_URL": os.getenv("CLIENT_URL"),
+        "ALLOWED_ORIGINS": allowed_origins,
+        "ENV_VERCEL_URL": os.getenv("VERCEL_URL")
+    }
 
 @app.get("/api/db-status")
 def db_status(db: Session = Depends(get_db)):

@@ -41,14 +41,14 @@ export async function apiFetch<T>(endpoint: string, options: RequestOptions = {}
         // JSON parsing failed
       }
       
-      console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, errorDetail);
+      console.error(`[API Error] ${options.method || 'GET'} ${url}:`, errorDetail);
       throw new Error(errorDetail);
     }
 
     return response.json() as Promise<T>;
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.error(`[API Connection Error] Failed to connect to ${API_BASE}. Ensure the backend is running and NEXT_PUBLIC_API_URL is set correctly.`);
+      console.error(`[API Connection Error] Failed to connect to ${url}. Ensure the backend is running and NEXT_PUBLIC_API_URL is set correctly.`);
       throw new Error('Could not connect to the server. Please check your internet or try again later.');
     }
     throw error;

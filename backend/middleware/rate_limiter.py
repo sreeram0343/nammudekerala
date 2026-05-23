@@ -30,8 +30,10 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         return new_tokens
 
     async def dispatch(self, request: Request, call_next):
-        # Allow websockets and static uploads to bypass rate limiting
-        if request.url.path == "/ws" or request.url.path.startswith("/uploads"):
+        # Allow websockets, static uploads and auth routes to bypass rate limiting
+        bypass_paths = ["/ws", "/api/auth", "/health", "/api/config-check", "/api/db-status"]
+        
+        if any(request.url.path.startswith(path) for path in bypass_paths):
             return await call_next(request)
 
         client_ip = request.client.host if request.client else "unknown"
