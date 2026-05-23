@@ -113,15 +113,20 @@ export default function LoginPage() {
           <h2 className="text-2xl font-black tracking-tight text-foreground">
             {isLoginTab ? "Welcome to Nammude Kerala" : "Join the Civic Square"}
           </h2>
-          <div className="flex items-center justify-center gap-2 mt-1">
+          <div className="flex flex-col items-center justify-center gap-1 mt-1">
             {serverStatus === "online" ? (
               <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                 ● Server Online
               </span>
             ) : serverStatus === "offline" ? (
-              <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                ● Server Offline (Check Config)
-              </span>
+              <>
+                <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                  ● Server Offline (Check Config)
+                </span>
+                <span className="text-[9px] text-slate-400 font-mono break-all px-4 text-center">
+                  Target: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
+                </span>
+              </>
             ) : (
               <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-400 animate-pulse">
                 ● Connecting to server...
