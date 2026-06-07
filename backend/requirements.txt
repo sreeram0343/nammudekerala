@@ -10,3 +10,5 @@ cloudinary
 email-validator
 google-auth
 requests
+pytest
+
