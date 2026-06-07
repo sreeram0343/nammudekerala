@@ -23,3 +23,14 @@ def toggle_follow_assembly(db: Session, assembly_id: int, user_id: int) -> dict:
         assembly.followers_count += 1
         db.commit()
         return {"status": "followed", "followers_count": assembly.followers_count}
+
+def check_follow_status(db: Session, assembly_id: int, user_id: int) -> dict:
+    follow = db.query(Follow).filter(
+        Follow.assembly_id == assembly_id,
+        Follow.user_id == user_id
+    ).first()
+    return {"following": follow is not None}
+
+def get_followed_assemblies(db: Session, user_id: int):
+    return db.query(Assembly).join(Follow).filter(Follow.user_id == user_id).order_by(Assembly.assembly_name).all()
+
