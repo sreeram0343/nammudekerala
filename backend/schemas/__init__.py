@@ -1,5 +1,5 @@
 from backend.schemas.schemas import (
-    UserCreate, UserResponse, Token, UserLogin, UserGoogleLogin,
+    UserCreate, UserResponse, Token, UserLogin, UserGoogleLogin, UserProfileUpdate,
     AssemblyResponse, AssemblyStats,
     PostCreate, PostResponse,
     CommentCreate, CommentResponse,

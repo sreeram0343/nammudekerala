@@ -19,6 +19,11 @@ class UserLogin(BaseModel):
 class UserGoogleLogin(BaseModel):
     token: str  # The ID token from Google
 
+class UserProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    profile_image: Optional[str] = None
+    constituency_id: Optional[int] = None
+
 class UserResponse(BaseModel):
     id: int
     username: str

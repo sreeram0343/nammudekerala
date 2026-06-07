@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from backend.models import User, Assembly
-from backend.schemas import UserCreate, UserLogin, UserGoogleLogin
+from backend.schemas import UserCreate, UserLogin, UserGoogleLogin, UserProfileUpdate
 from backend.utils.security import get_password_hash, verify_password, create_access_token
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -122,3 +122,30 @@ def authenticate_google_user(db: Session, google_data: UserGoogleLogin) -> dict:
         raise HTTPException(status_code=401, detail="Invalid Google token")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Google authentication failed: {str(e)}")
+
+def update_user_profile(db: Session, update_data: UserProfileUpdate, current_user: User) -> User:
+    if update_data.username:
+        if update_data.username != current_user.username:
+            existing_user = db.query(User).filter(User.username == update_data.username).first()
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Username already taken")
+            current_user.username = update_data.username
+            
+    if update_data.profile_image is not None:
+        current_user.profile_image = update_data.profile_image
+        
+    if update_data.constituency_id is not None:
+        assembly = db.query(Assembly).filter(Assembly.id == update_data.constituency_id).first()
+        if not assembly:
+            raise HTTPException(status_code=404, detail="Assembly constituency not found")
+        current_user.constituency_id = update_data.constituency_id
+        
+        # If user is representative, link/claim the MLA profile
+        if current_user.role == "representative":
+            assembly.mla_name = current_user.username.replace("_", " ").title()
+            assembly.mla_verified = True
+            
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
