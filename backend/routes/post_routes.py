@@ -5,7 +5,13 @@ from backend.database import get_db
 from backend.schemas import PostResponse, PostCreate, VoteSubmit
 from backend.models import User
 from backend.utils.security import get_current_user, get_required_current_user
-from backend.controllers.post_controller import get_posts_list, get_single_post, create_new_post, submit_post_vote
+from backend.controllers.post_controller import (
+    get_posts_list,
+    get_single_post,
+    create_new_post,
+    submit_post_vote,
+    delete_user_post
+)
 
 router = APIRouter(tags=["Posts"])
 
@@ -42,3 +48,12 @@ async def submit_vote(
     db: Session = Depends(get_db)
 ):
     return await submit_post_vote(db, vote_in, current_user)
+
+@router.delete("/api/posts/{post_id}")
+def delete_post(
+    post_id: int,
+    current_user: User = Depends(get_required_current_user),
+    db: Session = Depends(get_db)
+):
+    return delete_user_post(db, post_id, current_user.id, current_user.role)
+

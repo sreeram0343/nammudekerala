@@ -248,3 +248,20 @@ async def submit_post_vote(db: Session, vote_in: VoteSubmit, current_user: User)
             })
             
     return {"status": "success", "upvotes": up_count, "downvotes": down_count}
+
+def delete_user_post(db: Session, post_id: int, user_id: int, user_role: str) -> dict:
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+        
+    if post.user_id != user_id and user_role != "admin":
+        raise HTTPException(status_code=403, detail="You do not have permission to delete this post")
+        
+    assembly = post.assembly
+    if assembly:
+        assembly.issue_count = max(0, assembly.issue_count - 1)
+        
+    db.delete(post)
+    db.commit()
+    return {"status": "success", "message": "Post deleted successfully"}
+
