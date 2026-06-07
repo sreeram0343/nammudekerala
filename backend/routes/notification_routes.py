@@ -5,7 +5,11 @@ from backend.database import get_db
 from backend.schemas import NotificationResponse
 from backend.models import User
 from backend.utils.security import get_required_current_user
-from backend.controllers.notification_controller import get_user_notifications, mark_notification_read
+from backend.controllers.notification_controller import (
+    get_user_notifications,
+    mark_notification_read,
+    mark_all_notifications_read
+)
 
 router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
 
@@ -16,6 +20,13 @@ def get_notifications(
 ):
     return get_user_notifications(db, current_user.id)
 
+@router.post("/read-all")
+def mark_all_read(
+    current_user: User = Depends(get_required_current_user),
+    db: Session = Depends(get_db)
+):
+    return mark_all_notifications_read(db, current_user.id)
+
 @router.post("/{notification_id}/read")
 def mark_read(
     notification_id: int,
@@ -23,3 +34,4 @@ def mark_read(
     db: Session = Depends(get_db)
 ):
     return mark_notification_read(db, notification_id, current_user.id)
+
