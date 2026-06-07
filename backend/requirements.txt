@@ -11,4 +11,6 @@ email-validator
 google-auth
 requests
 pytest
+pytest-asyncio
+
 
