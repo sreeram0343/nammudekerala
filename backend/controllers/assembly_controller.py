@@ -4,8 +4,17 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 from backend.models import Assembly, Post
 
-def get_all_assemblies(db: Session) -> List[Assembly]:
-    return db.query(Assembly).order_by(Assembly.assembly_name).all()
+def get_all_assemblies(db: Session, search: Optional[str] = None, district: Optional[str] = None) -> List[Assembly]:
+    query = db.query(Assembly)
+    if search:
+        query = query.filter(
+            (Assembly.assembly_name.ilike(f"%{search}%")) |
+            (Assembly.slug.ilike(f"%{search}%"))
+        )
+    if district:
+        query = query.filter(Assembly.district.ilike(f"%{district}%"))
+    return query.order_by(Assembly.assembly_name).all()
+
 
 def get_global_stats(db: Session) -> dict:
     total = db.query(Post).count()
