@@ -156,7 +156,30 @@ async def create_new_post(db: Session, post_in: PostCreate, current_user: User) 
     db.refresh(db_post)
     
     # Create notification for followers of this assembly
-    # We can implement follower notification trigger if followers exist
+    from backend.models import Follow
+    followers = db.query(Follow).filter(
+        Follow.assembly_id == assembly.id,
+        Follow.user_id != current_user.id
+    ).all()
+    
+    for f in followers:
+        notif = Notification(
+            user_id=f.user_id,
+            post_id=db_post.id,
+            type="new_post",
+            title=f"New issue in @{assembly.assembly_name} 📢",
+            content=f"A new issue '{db_post.title}' was reported in {assembly.assembly_name}."
+        )
+        db.add(notif)
+    if followers:
+        db.commit()
+        for f in followers:
+            await manager.broadcast({
+                "type": "notification",
+                "user_id": f.user_id,
+                "title": f"New issue in @{assembly.assembly_name} 📢",
+                "content": f"A new issue '{db_post.title}' was reported in {assembly.assembly_name}."
+            })
     
     # Broadcast realtime WS event
     await manager.broadcast({
