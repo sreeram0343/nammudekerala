@@ -90,3 +90,16 @@ def get_post_comments_tree(db: Session, post_id: int) -> List[dict]:
                 parent_res["replies"].append(c_res)
                 
     return roots
+
+def delete_user_comment(db: Session, comment_id: int, user_id: int, user_role: str) -> dict:
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+        
+    if comment.user_id != user_id and user_role != "admin":
+        raise HTTPException(status_code=403, detail="You do not have permission to delete this comment")
+        
+    db.delete(comment)
+    db.commit()
+    return {"status": "success", "message": "Comment deleted successfully"}
+
